@@ -169,7 +169,8 @@ namespace System.ServiceModel.Federation
                 KeySizeInBits = keySize,
                 KeyType = keyType,
                 RequestType = WsTrustActions.Issue,
-                TokenType = SecurityTokenRequirement.TokenType
+                TokenType = SecurityTokenRequirement.TokenType,
+                WsTrustVersion = WsTrustVersion
             };
         }
 
@@ -267,7 +268,7 @@ namespace System.ServiceModel.Federation
         {
             get
             {
-                var trustVersion = MessageSecurityVersion.TrustVersion;
+                TrustVersion trustVersion = MessageSecurityVersion.TrustVersion;
 
                 if (trustVersion == TrustVersion.WSTrust13)
                 {
@@ -290,7 +291,7 @@ namespace System.ServiceModel.Federation
         {
             get
             {
-                var version = WsTrustVersion;
+                WsTrustVersion version = WsTrustVersion;
                 if (version is WsTrust14Version)
                 {
                     return WsTrustKeyTypes.Trust14;
@@ -315,7 +316,7 @@ namespace System.ServiceModel.Federation
         {
             get
             {
-                var version = WsTrustVersion;
+                WsTrustVersion version = WsTrustVersion;
                 if (version is WsTrust14Version)
                 {
                     return WsTrustActions.Trust14;
@@ -363,7 +364,7 @@ namespace System.ServiceModel.Federation
 
         private bool IsSecurityTokenResponseUnexpired(WsTrustResponse cachedResponse)
         {
-            var responseLifetime = cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.Lifetime;
+            Lifetime responseLifetime = cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.Lifetime;
 
             if (responseLifetime == null || responseLifetime.Expires == null)
             {
@@ -403,7 +404,7 @@ namespace System.ServiceModel.Federation
         /// </summary>
         protected override System.IdentityModel.Tokens.SecurityToken GetTokenCore(TimeSpan timeout)
         {
-            var request = CreateWsTrustRequest();
+            WsTrustRequest request = CreateWsTrustRequest();
             WsTrustResponse trustResponse = GetCachedResponse(request);
             if (trustResponse is null)
             {
@@ -427,7 +428,7 @@ namespace System.ServiceModel.Federation
             // Assumes that token is first and Saml2SecurityToken.
             using (var stream = new MemoryStream())
             {
-                var response = trustResponse.RequestSecurityTokenResponseCollection[0];
+                RequestSecurityTokenResponse response = trustResponse.RequestSecurityTokenResponseCollection[0];
 
                 // Get security token
                 var writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false);
@@ -449,8 +450,8 @@ namespace System.ServiceModel.Federation
                 IdentityModel.Tokens.SecurityToken proofToken = GetProofToken(request, response);
 
                 // Get lifetime
-                var created = response.Lifetime?.Created ?? DateTime.UtcNow;
-                var expires = response.Lifetime?.Expires ?? created.AddDays(1);
+                DateTime created = response.Lifetime?.Created ?? DateTime.UtcNow;
+                DateTime expires = response.Lifetime?.Expires ?? created.AddDays(1);
 
                 return new GenericXmlSecurityToken(dom.DocumentElement,
                                                    proofToken,
