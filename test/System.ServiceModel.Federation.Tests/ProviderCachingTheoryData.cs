@@ -15,5 +15,6 @@ namespace System.ServiceModel.Federation.Tests
         public WSTrustChannelSecurityTokenProvider Provider2 { get; set; }
         public int WaitBetweenGetTokenCallsMS { get; set; }
         public bool ShouldShareToken { get; set; }
+        public Action JustInTimePrep { get; set; }
     }
 }
